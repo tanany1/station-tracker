@@ -6,39 +6,96 @@
     body {
       font-family: sans-serif;
       padding: 20px;
+      background-color: #f4f4f4;
     }
-    label {
-      display: block;
-      margin: 10px 0;
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+      padding: 10px;
+    }
+    .card.visited {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .station-name {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h2>Station Visit Tracker</h2>
 
-  <label><input type="checkbox" id="station1" disabled> Station 1</label>
-  <label><input type="checkbox" id="station2" disabled> Station 2</label>
-  <label><input type="checkbox" id="station3" disabled> Station 3</label>
-  <label><input type="checkbox" id="station4" disabled> Station 4</label>
+  <div class="grid">
+    <div class="card" id="station1">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbIwiKbRMRJkaJBTn7kU1Atnt_Qd6exNbacQ&s" alt="Station 1">
+      <div class="station-name">Station 1</div>
+    </div>
+    <div class="card" id="station2">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbIwiKbRMRJkaJBTn7kU1Atnt_Qd6exNbacQ&s" alt="Station 2">
+      <div class="station-name">Station 2</div>
+    </div>
+    <div class="card" id="station3">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbIwiKbRMRJkaJBTn7kU1Atnt_Qd6exNbacQ&s" alt="Station 3">
+      <div class="station-name">Station 3</div>
+    </div>
+    <div class="card" id="station4">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbIwiKbRMRJkaJBTn7kU1Atnt_Qd6exNbacQ&s" alt="Station 4">
+      <div class="station-name">Station 4</div>
+    </div>
+  </div>
 
   <script>
+    const EXPIRY_TIME = 15 * 60 * 1000; // 15 minutes in ms
+    const STORAGE_KEY = "visitedStationsData";
+
     // Read station from URL
     const params = new URLSearchParams(window.location.search);
     const station = params.get("station");
 
-    // Get stored visited stations
-    let visited = JSON.parse(localStorage.getItem("visitedStations")) || [];
+    // Get stored data
+    let storedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { stations: [], timestamp: Date.now() };
 
-    // Mark the current station as visited
-    if (station && !visited.includes(station)) {
-      visited.push(station);
-      localStorage.setItem("visitedStations", JSON.stringify(visited));
+    // Check if data expired
+    if (Date.now() - storedData.timestamp > EXPIRY_TIME) {
+      storedData = { stations: [], timestamp: Date.now() }; // reset
     }
 
-    // Mark visited checkboxes
-    visited.forEach(id => {
-      const box = document.getElementById(`station${id}`);
-      if (box) box.checked = true;
+    // Mark the current station as visited
+    if (station && !storedData.stations.includes(station)) {
+      storedData.stations.push(station);
+      storedData.timestamp = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+    }
+
+    // Mark visited cards
+    storedData.stations.forEach(id => {
+      const card = document.getElementById(`station${id}`);
+      if (card) {
+        card.classList.add("visited");
+      }
     });
   </script>
 </body>

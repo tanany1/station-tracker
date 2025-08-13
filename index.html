@@ -8,10 +8,6 @@
       padding: 20px;
       background-color: #f4f4f4;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -63,8 +59,9 @@
   </style>
 </head>
 <body>
-  <h2>Station Visit Tracker</h2>
-
+  <div style="text-align:center; margin-bottom:20px;">
+  <img src="People Connect Logo.png" alt="Station Visit Tracker" style="max-width:250px; height:auto;">
+</div>
   <div class="grid">
     <div class="card" id="station1">
       <div class="station-number">1</div>
@@ -89,7 +86,6 @@
   </div>
 
   <button class="clear-btn" onclick="clearCache()">Clear Cache</button>
-
   <script>
     const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours in ms
     const STORAGE_KEY = "visitedStationsData";

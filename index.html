@@ -45,6 +45,21 @@
       font-size: 18px;
       font-weight: bold;
     }
+    .clear-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background-color: #d9534f;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .clear-btn:hover {
+      background-color: #c9302c;
+    }
   </style>
 </head>
 <body>
@@ -73,8 +88,10 @@
     </div>
   </div>
 
+  <button class="clear-btn" onclick="clearCache()">Clear Cache</button>
+
   <script>
-    const EXPIRY_TIME = 15 * 60 * 1000; // 15 minutes in ms
+    const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours in ms
     const STORAGE_KEY = "visitedStationsData";
 
     // Read station from URL
@@ -103,6 +120,12 @@
         card.classList.add("visited");
       }
     });
+
+    // Clear cache function
+    function clearCache() {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
   </script>
 </body>
 </html>

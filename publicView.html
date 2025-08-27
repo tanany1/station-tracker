@@ -95,38 +95,48 @@
 
   <script>
     const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours
-    const STORAGE_KEY = "stationCountsData";
+    const VISITED_KEY = "visitedStationsData";
+    const COUNT_KEY = "stationCountsData";
 
-    // Read station from URL (?station=1)
+    // --- Read station from URL ---
     const params = new URLSearchParams(window.location.search);
     const station = params.get("station");
 
-    // Load stored data
-    let storedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { counts: {}, timestamp: Date.now() };
-
-    // Reset if expired
-    if (Date.now() - storedData.timestamp > EXPIRY_TIME) {
-      storedData = { counts: {}, timestamp: Date.now() };
+    // --- Handle VISITED data (for tracker page sync) ---
+    let visitedData = JSON.parse(localStorage.getItem(VISITED_KEY)) || { stations: [], timestamp: Date.now() };
+    if (Date.now() - visitedData.timestamp > EXPIRY_TIME) {
+      visitedData = { stations: [], timestamp: Date.now() };
+    }
+    if (station && !visitedData.stations.includes(station)) {
+      visitedData.stations.push(station);
+      visitedData.timestamp = Date.now();
+      localStorage.setItem(VISITED_KEY, JSON.stringify(visitedData));
     }
 
-    // Increment counter for current station
+    // --- Handle COUNTS data ---
+    let countData = JSON.parse(localStorage.getItem(COUNT_KEY)) || { counts: {}, timestamp: Date.now() };
+    if (Date.now() - countData.timestamp > EXPIRY_TIME) {
+      countData = { counts: {}, timestamp: Date.now() };
+    }
     if (station) {
-      if (!storedData.counts[station]) storedData.counts[station] = 0;
-      storedData.counts[station] += 1;
-      storedData.timestamp = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+      if (!countData.counts[station]) countData.counts[station] = 0;
+      countData.counts[station] += 1;
+      countData.timestamp = Date.now();
+      localStorage.setItem(COUNT_KEY, JSON.stringify(countData));
     }
 
-    // Render counts
+    // --- Render counts ---
     for (let i = 1; i <= 5; i++) {
       const countEl = document.getElementById(`count${i}`);
       if (countEl) {
-        countEl.textContent = storedData.counts[i] || 0;
+        countEl.textContent = countData.counts[i] || 0;
       }
     }
 
+    // --- Clear all data ---
     function clearCache() {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(VISITED_KEY);
+      localStorage.removeItem(COUNT_KEY);
       location.reload();
     }
   </script>

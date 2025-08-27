@@ -88,50 +88,51 @@
 
   <button class="clear-btn" onclick="clearCache()">Clear Cache</button>
 
-  <script>
-    const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours
-    const VISITED_KEY = "visitedStationsData";
-    const COUNT_KEY = "stationCountsData";
+<script>
+  const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours
+  const VISITED_KEY = "visitedStationsData";
+  const COUNT_KEY = "stationCountsData";
 
-    // --- Read station from URL (?station=1) ---
-    const params = new URLSearchParams(window.location.search);
-    const station = params.get("station");
+  // Read station from URL
+  const params = new URLSearchParams(window.location.search);
+  const station = params.get("station");
 
-    // --- Handle VISITED data ---
-    let visitedData = JSON.parse(localStorage.getItem(VISITED_KEY)) || { stations: [], timestamp: Date.now() };
-    if (Date.now() - visitedData.timestamp > EXPIRY_TIME) {
-      visitedData = { stations: [], timestamp: Date.now() };
-    }
-    if (station && !visitedData.stations.includes(station)) {
-      visitedData.stations.push(station);
-      visitedData.timestamp = Date.now();
-      localStorage.setItem(VISITED_KEY, JSON.stringify(visitedData));
-    }
+  // --- Handle VISITED (green marking) ---
+  let visitedData = JSON.parse(localStorage.getItem(VISITED_KEY)) || { stations: [], timestamp: Date.now() };
+  if (Date.now() - visitedData.timestamp > EXPIRY_TIME) {
+    visitedData = { stations: [], timestamp: Date.now() };
+  }
+  if (station && !visitedData.stations.includes(station)) {
+    visitedData.stations.push(station);
+    visitedData.timestamp = Date.now();
+    localStorage.setItem(VISITED_KEY, JSON.stringify(visitedData));
+  }
 
-    // --- Handle COUNTS data ---
-    let countData = JSON.parse(localStorage.getItem(COUNT_KEY)) || { counts: {}, timestamp: Date.now() };
-    if (Date.now() - countData.timestamp > EXPIRY_TIME) {
-      countData = { counts: {}, timestamp: Date.now() };
-    }
-    if (station) {
-      if (!countData.counts[station]) countData.counts[station] = 0;
-      countData.counts[station] += 1;
-      countData.timestamp = Date.now();
-      localStorage.setItem(COUNT_KEY, JSON.stringify(countData));
-    }
+  // --- Handle COUNTS (increment numbers) ---
+  let countData = JSON.parse(localStorage.getItem(COUNT_KEY)) || { counts: {}, timestamp: Date.now() };
+  if (Date.now() - countData.timestamp > EXPIRY_TIME) {
+    countData = { counts: {}, timestamp: Date.now() };
+  }
+  if (station) {
+    if (!countData.counts[station]) countData.counts[station] = 0;
+    countData.counts[station] += 1;
+    countData.timestamp = Date.now();
+    localStorage.setItem(COUNT_KEY, JSON.stringify(countData));
+  }
 
-    // --- Render visited stations ---
-    visitedData.stations.forEach(id => {
-      const card = document.getElementById(`station${id}`);
-      if (card) card.classList.add("visited");
-    });
+  // --- Render visited ---
+  visitedData.stations.forEach(id => {
+    const card = document.getElementById(`station${id}`);
+    if (card) card.classList.add("visited");
+  });
 
-    // --- Clear all data ---
-    function clearCache() {
-      localStorage.removeItem(VISITED_KEY);
-      localStorage.removeItem(COUNT_KEY);
-      location.reload();
-    }
-  </script>
+  // --- Clear cache ---
+  function clearCache() {
+    localStorage.removeItem(VISITED_KEY);
+    localStorage.removeItem(COUNT_KEY);
+    location.reload();
+  }
+</script>
 </body>
 </html>
+

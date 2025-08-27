@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Station Public View</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+    .station-number {
+      font-size: 60px;
+      font-weight: bold;
+    }
+    .station-name {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .count {
+      margin-top: 15px;
+      font-size: 22px;
+      color: #333;
+    }
+    .clear-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background-color: #d9534f;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .clear-btn:hover {
+      background-color: #c9302c;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-bottom:20px;">
+    <img src="People Connect Logo.png" alt="Station Visit Counter" style="max-width:250px; height:auto;">
+  </div>
+
+  <div class="grid">
+    <div class="card" id="station1">
+      <div class="station-number">1</div>
+      <div class="station-name">Station 1</div>
+      <div class="count" id="count1">0</div>
+    </div>
+    <div class="card" id="station2">
+      <div class="station-number">2</div>
+      <div class="station-name">Station 2</div>
+      <div class="count" id="count2">0</div>
+    </div>
+    <div class="card" id="station3">
+      <div class="station-number">3</div>
+      <div class="station-name">Station 3</div>
+      <div class="count" id="count3">0</div>
+    </div>
+    <div class="card" id="station4">
+      <div class="station-number">4</div>
+      <div class="station-name">Station 4</div>
+      <div class="count" id="count4">0</div>
+    </div>
+    <div class="card" id="station5">
+      <div class="station-number">5</div>
+      <div class="station-name">Station 5</div>
+      <div class="count" id="count5">0</div>
+    </div>
+  </div>
+
+  <button class="clear-btn" onclick="clearCache()">Clear Cache</button>
+
+  <script>
+    const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours
+    const STORAGE_KEY = "stationCountsData";
+
+    // Read station from URL (?station=1)
+    const params = new URLSearchParams(window.location.search);
+    const station = params.get("station");
+
+    // Load stored data
+    let storedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { counts: {}, timestamp: Date.now() };
+
+    // Reset if expired
+    if (Date.now() - storedData.timestamp > EXPIRY_TIME) {
+      storedData = { counts: {}, timestamp: Date.now() };
+    }
+
+    // Increment counter for current station
+    if (station) {
+      if (!storedData.counts[station]) storedData.counts[station] = 0;
+      storedData.counts[station] += 1;
+      storedData.timestamp = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+    }
+
+    // Render counts
+    for (let i = 1; i <= 5; i++) {
+      const countEl = document.getElementById(`count${i}`);
+      if (countEl) {
+        countEl.textContent = storedData.counts[i] || 0;
+      }
+    }
+
+    function clearCache() {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+  </script>
+</body>
+</html>

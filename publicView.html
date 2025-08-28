@@ -41,104 +41,38 @@
       font-size: 22px;
       color: #333;
     }
-    .clear-btn {
-      display: block;
-      margin: 30px auto;
-      padding: 12px 25px;
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
-      background-color: #d9534f;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .clear-btn:hover {
-      background-color: #c9302c;
-    }
   </style>
 </head>
 <body>
   <div style="text-align:center; margin-bottom:20px;">
-    <img src="People Connect Logo.png" alt="Station Visit Counter" style="max-width:250px; height:auto;">
+    <img src="https://raw.githubusercontent.com/tanany1/station-tracker/main/People%20Connect%20Logo.png" alt="Station Visit Counter" style="max-width:250px; height:auto;">
   </div>
 
   <div class="grid">
-    <div class="card" id="station1">
-      <div class="station-number">1</div>
-      <div class="station-name">Station 1</div>
-      <div class="count" id="count1">0</div>
-    </div>
-    <div class="card" id="station2">
-      <div class="station-number">2</div>
-      <div class="station-name">Station 2</div>
-      <div class="count" id="count2">0</div>
-    </div>
-    <div class="card" id="station3">
-      <div class="station-number">3</div>
-      <div class="station-name">Station 3</div>
-      <div class="count" id="count3">0</div>
-    </div>
-    <div class="card" id="station4">
-      <div class="station-number">4</div>
-      <div class="station-name">Station 4</div>
-      <div class="count" id="count4">0</div>
-    </div>
-    <div class="card" id="station5">
-      <div class="station-number">5</div>
-      <div class="station-name">Station 5</div>
-      <div class="count" id="count5">0</div>
-    </div>
+    <div class="card"><div class="station-number">1</div><div class="station-name">Station 1</div><div class="count" id="count1">0</div></div>
+    <div class="card"><div class="station-number">2</div><div class="station-name">Station 2</div><div class="count" id="count2">0</div></div>
+    <div class="card"><div class="station-number">3</div><div class="station-name">Station 3</div><div class="count" id="count3">0</div></div>
+    <div class="card"><div class="station-number">4</div><div class="station-name">Station 4</div><div class="count" id="count4">0</div></div>
+    <div class="card"><div class="station-number">5</div><div class="station-name">Station 5</div><div class="count" id="count5">0</div></div>
   </div>
 
-  <button class="clear-btn" onclick="clearCache()">Clear Cache</button>
-
   <script>
-    const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours
-    const VISITED_KEY = "visitedStationsData";
-    const COUNT_KEY = "stationCountsData";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzy66aMnsEqkLFWGIZSxlNvXwSJ8EsT9iZ4DnggdITc_JDWVxQfKZLQZZgNk2vxbrqF/exec"; // <-- replace with same URL
 
-    // --- Read station from URL ---
-    const params = new URLSearchParams(window.location.search);
-    const station = params.get("station");
-
-    // --- Handle VISITED data (for tracker page sync) ---
-    let visitedData = JSON.parse(localStorage.getItem(VISITED_KEY)) || { stations: [], timestamp: Date.now() };
-    if (Date.now() - visitedData.timestamp > EXPIRY_TIME) {
-      visitedData = { stations: [], timestamp: Date.now() };
-    }
-    if (station && !visitedData.stations.includes(station)) {
-      visitedData.stations.push(station);
-      visitedData.timestamp = Date.now();
-      localStorage.setItem(VISITED_KEY, JSON.stringify(visitedData));
+    function loadCounts() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          for (let i = 1; i <= 5; i++) {
+            document.getElementById(`count${i}`).textContent = data[i] || 0;
+          }
+        })
+        .catch(err => console.error("Error loading counts", err));
     }
 
-    // --- Handle COUNTS data ---
-    let countData = JSON.parse(localStorage.getItem(COUNT_KEY)) || { counts: {}, timestamp: Date.now() };
-    if (Date.now() - countData.timestamp > EXPIRY_TIME) {
-      countData = { counts: {}, timestamp: Date.now() };
-    }
-    if (station) {
-      if (!countData.counts[station]) countData.counts[station] = 0;
-      countData.counts[station] += 1;
-      countData.timestamp = Date.now();
-      localStorage.setItem(COUNT_KEY, JSON.stringify(countData));
-    }
-
-    // --- Render counts ---
-    for (let i = 1; i <= 5; i++) {
-      const countEl = document.getElementById(`count${i}`);
-      if (countEl) {
-        countEl.textContent = countData.counts[i] || 0;
-      }
-    }
-
-    // --- Clear all data ---
-    function clearCache() {
-      localStorage.removeItem(VISITED_KEY);
-      localStorage.removeItem(COUNT_KEY);
-      location.reload();
-    }
+    // Load immediately and refresh every 10s
+    loadCounts();
+    setInterval(loadCounts, 10000);
   </script>
 </body>
 </html>

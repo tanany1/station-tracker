@@ -26,6 +26,7 @@
       justify-content: center;
       align-items: center;
       height: 200px;
+      transition: background 0.3s;
     }
     .station-number {
       font-size: 60px;
@@ -35,6 +36,10 @@
       margin-top: 10px;
       font-size: 18px;
       font-weight: bold;
+    }
+    .visited {
+      background-color: #d4edda !important;
+      border: 2px solid #28a745;
     }
     .message {
       text-align: center;
@@ -66,27 +71,42 @@
   </div>
 
   <div class="grid">
-    <div class="card"><div class="station-number">1</div><div class="station-name">Station 1</div></div>
-    <div class="card"><div class="station-number">2</div><div class="station-name">Station 2</div></div>
-    <div class="card"><div class="station-number">3</div><div class="station-name">Station 3</div></div>
-    <div class="card"><div class="station-number">4</div><div class="station-name">Station 4</div></div>
-    <div class="card"><div class="station-number">5</div><div class="station-name">Station 5</div></div>
+    <div class="card" id="station1"><div class="station-number">1</div><div class="station-name">Station 1</div></div>
+    <div class="card" id="station2"><div class="station-number">2</div><div class="station-name">Station 2</div></div>
+    <div class="card" id="station3"><div class="station-number">3</div><div class="station-name">Station 3</div></div>
+    <div class="card" id="station4"><div class="station-number">4</div><div class="station-name">Station 4</div></div>
+    <div class="card" id="station5"><div class="station-number">5</div><div class="station-name">Station 5</div></div>
   </div>
 
   <div id="msg" class="message"></div>
   <button class="clear-btn" onclick="clearTrackerCache()">Clear Cache</button>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzBR1vS-wIOeSgIzMIw85-3bMRGSnBkTH6ikxZZSDC6SCgPssNAIInUJfosHRtPWPAsjQ/exec"; // replace with your deployed URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbzBR1vS-wIOeSgIzMIw85-3bMRGSnBkTH6ikxZZSDC6SCgPssNAIInUJfosHRtPWPAsjQ/exec"; // replace with same URL
 
     const params = new URLSearchParams(window.location.search);
     const station = params.get("station");
+
+    // restore visited stations from localStorage
+    const visited = JSON.parse(localStorage.getItem("visitedStations") || "[]");
+
+    visited.forEach(s => {
+      const el = document.getElementById("station" + s);
+      if (el) el.classList.add("visited");
+    });
 
     if (station) {
       fetch(`${API_URL}?station=${station}`)
         .then(res => res.text())
         .then(data => {
           document.getElementById("msg").textContent = `You checked in at Station ${station}`;
+          // mark as visited
+          if (!visited.includes(station)) {
+            visited.push(station);
+            localStorage.setItem("visitedStations", JSON.stringify(visited));
+          }
+          const el = document.getElementById("station" + station);
+          if (el) el.classList.add("visited");
         })
         .catch(err => {
           document.getElementById("msg").textContent = "Error updating station";
@@ -95,7 +115,7 @@
     }
 
     function clearTrackerCache() {
-      localStorage.clear();
+      localStorage.removeItem("visitedStations");
       location.reload();
     }
   </script>

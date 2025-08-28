@@ -43,11 +43,26 @@
       color: green;
       font-weight: bold;
     }
+    .clear-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .clear-btn:hover {
+      background: #c9302c;
+    }
   </style>
 </head>
 <body>
   <div style="text-align:center; margin-bottom:20px;">
-    <img src="https://raw.githubusercontent.com/tanany1/station-tracker/main/People%20Connect%20Logo.png" alt="Station Visit Tracker" style="max-width:250px; height:auto;">
+    <img src="https://raw.githubusercontent.com/tanany1/station-tracker/main/People%20Connect%20Logo.png" 
+         alt="Station Visit Tracker" style="max-width:250px; height:auto;">
   </div>
 
   <div class="grid">
@@ -59,9 +74,10 @@
   </div>
 
   <div id="msg" class="message"></div>
+  <button class="clear-btn" onclick="clearTrackerCache()">Clear Cache</button>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzy66aMnsEqkLFWGIZSxlNvXwSJ8EsT9iZ4DnggdITc_JDWVxQfKZLQZZgNk2vxbrqF/exec"; // <-- replace with your Apps Script Web App URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbzBR1vS-wIOeSgIzMIw85-3bMRGSnBkTH6ikxZZSDC6SCgPssNAIInUJfosHRtPWPAsjQ/exec"; // replace with your deployed URL
 
     const params = new URLSearchParams(window.location.search);
     const station = params.get("station");
@@ -76,6 +92,11 @@
           document.getElementById("msg").textContent = "Error updating station";
           console.error(err);
         });
+    }
+
+    function clearTrackerCache() {
+      localStorage.clear();
+      location.reload();
     }
   </script>
 </body>

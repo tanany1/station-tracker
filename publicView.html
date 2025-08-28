@@ -81,7 +81,7 @@
       fetch(API_URL)
         .then(res => res.json())
         .then(data => {
-          for (let i = 1; i <= 5; i++) {
+          for (let i = 1; i <= 6; i++) {
             document.getElementById(`count${i}`).textContent = data[i] || 0;
           }
         })
@@ -103,3 +103,4 @@
   </script>
 </body>
 </html>
+

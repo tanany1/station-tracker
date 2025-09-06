@@ -60,8 +60,8 @@
 </head>
 <body>
   <div style="text-align:center; margin-bottom:20px;">
-  <img src="People Connect Logo.png" alt="Station Visit Tracker" style="max-width:250px; height:auto;">
-</div>
+    <img src="People Connect Logo.png" alt="Station Visit Tracker" style="max-width:250px; height:auto;">
+  </div>
   <div class="grid">
     <div class="card" id="station1">
       <div class="station-number">1</div>
@@ -86,6 +86,7 @@
   </div>
 
   <button class="clear-btn" onclick="clearCache()">Clear Cache</button>
+
   <script>
     const EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours in ms
     const STORAGE_KEY = "visitedStationsData";
@@ -94,28 +95,65 @@
     const params = new URLSearchParams(window.location.search);
     const station = params.get("station");
 
-    // Get stored data
-    let storedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { stations: [], timestamp: Date.now() };
+    // BroadcastChannel for cross-tab communication
+    const channel = new BroadcastChannel("stationTracker");
 
-    // Check if data expired
-    if (Date.now() - storedData.timestamp > EXPIRY_TIME) {
-      storedData = { stations: [], timestamp: Date.now() }; // reset
-    }
+    // Function to save station
+    function saveStation(stationId) {
+      let storedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { stations: [], timestamp: Date.now() };
 
-    // Mark the current station as visited
-    if (station && !storedData.stations.includes(station)) {
-      storedData.stations.push(station);
-      storedData.timestamp = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
-    }
-
-    // Mark visited cards
-    storedData.stations.forEach(id => {
-      const card = document.getElementById(`station${id}`);
-      if (card) {
-        card.classList.add("visited");
+      // Reset if expired
+      if (Date.now() - storedData.timestamp > EXPIRY_TIME) {
+        storedData = { stations: [], timestamp: Date.now() };
       }
-    });
+
+      if (stationId && !storedData.stations.includes(stationId)) {
+        storedData.stations.push(stationId);
+        storedData.timestamp = Date.now();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(storedData));
+      }
+
+      // Update UI
+      markVisited(storedData.stations);
+    }
+
+    // Function to update UI
+    function markVisited(stations) {
+      stations.forEach(id => {
+        const card = document.getElementById(`station${id}`);
+        if (card) {
+          card.classList.add("visited");
+        }
+      });
+    }
+
+    // Listen for cross-tab messages
+    channel.onmessage = (event) => {
+      if (event.data.type === "visit") {
+        saveStation(event.data.station);
+      }
+    };
+
+    // Handle direct visit via QR code link
+    if (station) {
+      // Save locally
+      saveStation(station);
+      // Notify other tabs
+      channel.postMessage({ type: "visit", station });
+
+      // Redirect back to main page (without ?station param)
+      if (window.location.search.includes("station=")) {
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 500);
+      }
+    } else {
+      // No station param → just restore saved state
+      const storedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (storedData && storedData.stations) {
+        markVisited(storedData.stations);
+      }
+    }
 
     // Clear cache function
     function clearCache() {
